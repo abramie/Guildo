@@ -21,6 +21,9 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import sqlite3
 
+intents = discord.Intents.all()
+
+
 db_file = os.path.dirname(__file__) + '/table.db'
 def create_database():
     print("creation of the database ")
@@ -42,8 +45,8 @@ def create_database():
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = discord.Client()
-bot = commands.Bot(command_prefix='G!')
+client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='G!',intents=intents)
 
 if not os.path.isfile(db_file): 
     create_database()
@@ -91,12 +94,17 @@ async def open_table(ctx):
         await ctx.channel.send("nouvelle table créer  " + ctx.author.mention)
     else:
         await ctx.channel.send("Mauvais salon ! " + ctx.author.mention)
+
+@bot.command()
+async def test(ctx, *, arg):
+    await ctx.send(arg)
         
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
-        
-        
+    else:
+    	await ctx.send('erreur avec la commande')
+
 bot.run(TOKEN)
 con.close()
