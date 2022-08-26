@@ -18,12 +18,12 @@ import random
 from dotenv import load_dotenv
 #import nest_asyncio
 #nest_asyncio.apply()
-from discord.ext import commands
+from discord.ext import commands,tasks
 import sqlite3
-
+from datetime import time
 intents = discord.Intents.all()
-
-
+#import asyncpg
+dt = time(hour=16,minute=47)
 db_file = os.path.dirname(__file__) + '/table.db'
 def create_database():
     print("creation of the database ")
@@ -63,6 +63,8 @@ async def on_ready():
             f'{bot.user} is connected to the following guild:\n'
             f'{guild.name}(id: {guild.id})'
         )
+    #sendTableStatus.add_exception_type(asyncpg.PostgresConnectionError)
+    sendTableStatus.start()
 @bot.event
 async def on_member_join(member):
     await member.create_dm()
@@ -105,6 +107,21 @@ async def on_command_error(ctx, error):
         await ctx.send('You do not have the correct role for this command.')
     else:
     	await ctx.send('erreur avec la commande')
+def check_if_it_is_me(ctx):
+    return ctx.message.author.id == 210147166583259136
 
+@bot.command(name='id', help='print the id of the channel')
+@commands.check(check_if_it_is_me)
+async def getId(ctx):
+    
+    print(f'channel id : {ctx.channel.id}\n' 
+          f'user id : {ctx.author.id}')
+    channel = bot.get_channel(967770476900413460)
+    await channel.send("test message id")
+@tasks.loop(seconds=3.0,count=5)
+async def sendTableStatus():
+    print("loop valid")
+    channel = bot.get_channel(967770476900413460)
+    await channel.send("test message")
 bot.run(TOKEN)
 con.close()
